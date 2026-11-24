@@ -2,6 +2,11 @@
 This repository is collection of reference projects for XYZ school c++ course.
 Just open the Game.sln and enjoy.
 
+## Учебные работы
+
+- [Задания курса и проекты](docs/coursework.md)
+- [Lantern Below — дипломный Roguelike](docs/lantern-below.md)
+
 # License and author rights 
 ©2023, XYZ School. All rights reserved.
 Authored by Aleksandr Rybalka (polterageist@gmail.com)
