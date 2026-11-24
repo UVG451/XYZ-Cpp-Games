@@ -5,7 +5,7 @@
 #include <functional>
 #include <vector>
 
-namespace ArkanoidGame
+namespace RoguelikeGame
 {
     class MenuItem
     {

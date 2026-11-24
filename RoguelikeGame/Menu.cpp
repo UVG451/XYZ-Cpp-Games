@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <algorithm>
 
-namespace ArkanoidGame
+namespace RoguelikeGame
 {
 	// Helper: get node by index path
 	MenuItem* Menu::getNodeByPath(const std::vector<std::size_t>& path)

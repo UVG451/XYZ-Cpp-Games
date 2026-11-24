@@ -19,7 +19,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BallsManager", "BallsManage
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GuessingGame", "GuessingGame\GuessingGame.vcxproj", "{304D039D-2025-46F1-BA8B-07A0D1EE20E0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArkanoidGame", "ArkanoidGame\ArkanoidGame.vcxproj", "{C3A962DD-12D8-4E72-99F3-C940EF572498}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RoguelikeGame", "RoguelikeGame\RoguelikeGame.vcxproj", "{C3A962DD-12D8-4E72-99F3-C940EF572498}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
