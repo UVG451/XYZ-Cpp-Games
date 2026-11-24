@@ -1,7 +1,9 @@
 ﻿#include "Game.h"
 #include "Math.h"
 
-#include <cassert>
+#include <iterator>
+#include <random>
+#include <stdexcept>
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
@@ -14,7 +16,6 @@ namespace ApplesGame
         "Alice", "Bob", "Carol", "Dave", "Eve",
         "Frank", "Grace", "Heidi", "Ivan", "Judy"
     };
-    const int NAMES_POOL_SIZE = sizeof(NAMES_POOL) / sizeof(NAMES_POOL[0]);
 
     // простая сортировка выбором по убыванию score (без std::sort)
     void SortLeaderboard(std::vector<Record>& board)
@@ -34,41 +35,25 @@ namespace ApplesGame
 
     void GenerateRandomLeaderboard(GameState& gameState, int count)
     {
-        gameState.leaderboard.clear();
-        count = std::max(5, std::min(count, 10)); // от 5 до 10 записей
-
+        std::vector<std::string> names(std::begin(NAMES_POOL), std::end(NAMES_POOL));
+        std::mt19937 random(std::random_device{}());
+        std::shuffle(names.begin(), names.end(), random);
+        std::uniform_int_distribution<int> score(20, 139);
+        count = std::max(4, std::min(count, 9));
         for (int i = 0; i < count; ++i)
         {
-            Record r;
-            r.name = NAMES_POOL[std::rand() % NAMES_POOL_SIZE];
-            r.score = 20 + std::rand() % 120; // очки 20–139
-            gameState.leaderboard.push_back(r);
+            gameState.leaderboardScores.emplace(names[i], score(random));
         }
-
-        gameState.isLeaderboardInitialized = true;
     }
 
     void UpdateLeaderboardWithPlayer(GameState& gameState)
     {
-        Record playerRecord;
-        playerRecord.name = "Player";
-        playerRecord.score = gameState.numEatenApples;
-
-        bool replaced = false;
-        for (auto& r : gameState.leaderboard)
+        gameState.leaderboardScores["Player"] = gameState.bestScore;
+        gameState.leaderboard.clear();
+        for (const auto& entry : gameState.leaderboardScores)
         {
-            if (r.name == "Player")
-            {
-                r.score = playerRecord.score;
-                replaced = true;
-                break;
-            }
+            gameState.leaderboard.push_back({entry.first, entry.second});
         }
-        if (!replaced)
-        {
-            gameState.leaderboard.push_back(playerRecord);
-        }
-
         SortLeaderboard(gameState.leaderboard);
     }
 
@@ -79,14 +64,20 @@ namespace ApplesGame
         std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
         // ресурсы
-        assert(gameState.playerTexture.loadFromFile(RESOURCES_PATH + "Pacman.png"));
-        assert(gameState.appleTexture.loadFromFile(RESOURCES_PATH + "Apple.png"));
-        assert(gameState.obstacleTexture.loadFromFile(RESOURCES_PATH + "Obstacle.png"));
-        assert(gameState.font.loadFromFile(RESOURCES_PATH + "Fonts/Roboto-Regular.ttf"));
+        if (!gameState.playerTexture.loadFromFile(RESOURCES_PATH + "Pacman.png"))
+            throw std::runtime_error("Cannot load Pacman.png");
+        if (!gameState.appleTexture.loadFromFile(RESOURCES_PATH + "Apple.png"))
+            throw std::runtime_error("Cannot load Apple.png");
+        if (!gameState.obstacleTexture.loadFromFile(RESOURCES_PATH + "Obstacle.png"))
+            throw std::runtime_error("Cannot load Obstacle.png");
+        if (!gameState.font.loadFromFile(RESOURCES_PATH + "Fonts/Roboto-Regular.ttf"))
+            throw std::runtime_error("Cannot load Fonts/Roboto-Regular.ttf");
 
         // звуки
-        assert(gameState.eatAppleBuffer.loadFromFile(RESOURCES_PATH + "Sounds/eat.wav"));
-        assert(gameState.hitBuffer.loadFromFile(RESOURCES_PATH + "Sounds/hit.wav"));
+        if (!gameState.eatAppleBuffer.loadFromFile(RESOURCES_PATH + "Sounds/eat.wav"))
+            throw std::runtime_error("Cannot load Sounds/eat.wav");
+        if (!gameState.hitBuffer.loadFromFile(RESOURCES_PATH + "Sounds/hit.wav"))
+            throw std::runtime_error("Cannot load Sounds/hit.wav");
 
         gameState.eatAppleSound.setBuffer(gameState.eatAppleBuffer);
         gameState.hitSound.setBuffer(gameState.hitBuffer);
@@ -105,7 +96,7 @@ namespace ApplesGame
     void RestartGame(GameState& gameState)
     {
         // первая инициализация leaderboard – делаем новую таблицу
-        if (!gameState.isLeaderboardInitialized)
+        if (gameState.leaderboardScores.empty())
         {
             GenerateRandomLeaderboard(gameState, 7); // например, 7 записей
         }
@@ -153,19 +144,19 @@ namespace ApplesGame
             return;
         }
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::W))
         {
             gameState.player.direction = PlayerDirection::Up;
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::D))
         {
             gameState.player.direction = PlayerDirection::Right;
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::S))
         {
             gameState.player.direction = PlayerDirection::Down;
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::A))
         {
             gameState.player.direction = PlayerDirection::Left;
         }

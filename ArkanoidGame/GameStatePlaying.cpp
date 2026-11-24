@@ -174,7 +174,7 @@ namespace ArkanoidGame
             inputHintText.setFont(font);
             inputHintText.setCharacterSize(18);
             inputHintText.setFillColor(sf::Color::White);
-            inputHintText.setString("Use arrow keys or mouse to move platform, SPACE to release ball, ESC to pause");
+            inputHintText.setString("Use arrow keys or mouse to move platform, SPACE to release ball, P or ESC to pause");
             inputHintText.setOrigin(GetTextOrigin(inputHintText, { 1.f, 1.f }));
 
             debugText.setFont(font);

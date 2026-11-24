@@ -1,5 +1,7 @@
 ﻿#include <SFML/Graphics.hpp>
 #include "Game.h"
+#include <exception>
+#include <iostream>
 
 using namespace ApplesGame;
 
@@ -98,7 +100,15 @@ int main()
         return 0;
 
     // инициализация игры после выбора режима
-    InitGame(gameState);
+    try
+    {
+        InitGame(gameState);
+    }
+    catch (const std::exception& error)
+    {
+        std::cerr << error.what() << std::endl;
+        return 1;
+    }
 
     // основной цикл
     sf::Clock clock;

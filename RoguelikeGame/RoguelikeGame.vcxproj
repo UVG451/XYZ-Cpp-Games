@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{AE0A5311-529F-42AD-BC33-C09BF2A1D048}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <PropertyGroup>
+    <SfmlRoot>$(MSBuildProjectDirectory)\..\SFML\SFML-2.5.1</SfmlRoot>
+    <SfmlSuffix Condition="'$(Configuration)'=='Debug'">-d</SfmlSuffix>
+    <OutDir>$(MSBuildProjectDirectory)\..\x64\$(Configuration)\RoguelikeGame\</OutDir>
+    <IntDir>$(MSBuildProjectDirectory)\x64\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <WarningLevel>Level4</WarningLevel>
+      <AdditionalIncludeDirectories>$(SfmlRoot)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <AdditionalLibraryDirectories>$(SfmlRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-graphics$(SfmlSuffix).lib;sfml-window$(SfmlSuffix).lib;sfml-system$(SfmlSuffix).lib;sfml-audio$(SfmlSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="GameMain.cpp" />
+    <ClCompile Include="World.cpp" />
+    <ClInclude Include="Engine.h" />
+    <ClInclude Include="World.h" />
+    <Runtime Include="$(SfmlRoot)\bin\sfml-graphics$(SfmlSuffix)-2.dll;$(SfmlRoot)\bin\sfml-window$(SfmlSuffix)-2.dll;$(SfmlRoot)\bin\sfml-system$(SfmlSuffix)-2.dll;$(SfmlRoot)\bin\sfml-audio$(SfmlSuffix)-2.dll;$(SfmlRoot)\bin\openal32.dll;$(SfmlRoot)\license.md" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Target Name="CopySfmlRuntime" AfterTargets="Build">
+    <Copy SourceFiles="@(Runtime)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+</Project>

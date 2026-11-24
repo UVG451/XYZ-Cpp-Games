@@ -8,12 +8,12 @@ namespace ApplesGame
     const std::string RESOURCES_PATH = "Resources/";
 
     // Размеры объектов
-    const float PLAYER_SIZE = 20.f;
-    const float APPLE_SIZE = 20.f;
+    const float PLAYER_SIZE = 30.f;
+    const float APPLE_SIZE = 20.f / 1.5f;
     const float OBSTACLE_SIZE = 25.f;
 
     // Движение
-    const float INITIAL_SPEED = 100.f;
+    const float INITIAL_SPEED = 120.f;
     const float ACCELERATION = 10.f;   // базовое ускорение за яблоко
 
     // Экран

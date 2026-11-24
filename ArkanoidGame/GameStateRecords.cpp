@@ -84,7 +84,7 @@ namespace ArkanoidGame
     {
         if (event.type == sf::Event::KeyPressed)
         {
-            if (event.key.code == sf::Keyboard::Escape)
+            if (event.key.code == sf::Keyboard::Escape || event.key.code == sf::Keyboard::BackSpace)
             {
                 std::cout << "[RecordsState] Escape - back to menu" << std::endl;
                 // If this RecordsState replaced the main menu (switchState), switch back to a fresh main menu.
