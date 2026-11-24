@@ -2,6 +2,7 @@
 
 #include <array>
 #include <functional>
+#include <memory>
 #include <random>
 #include <string_view>
 #include <vector>
@@ -36,12 +37,53 @@ struct Health
     int heal(int amount);
 };
 
-struct Enemy
+struct Character
 {
     Cell cell;
     Health health;
-    bool guardian;
-    bool angry = false;
+};
+
+struct Finder
+{
+    int range;
+    bool chasing = false;
+    bool detects(int distance) const
+    {
+        return distance >= 0 && distance <= range;
+    }
+};
+
+struct Enemy : Character
+{
+    Enemy(Cell cell, Health health, bool guardian, int attackPower, int range)
+        : Character{cell, health}, guardian(guardian), attackPower(attackPower), finder{range}
+    {
+    }
+    virtual ~Enemy() = default;
+
+    const bool guardian;
+    const int attackPower;
+    Finder finder;
+};
+
+struct Creeper final : Enemy
+{
+    Creeper(Cell cell, int floor) : Enemy(cell, {4 + floor, 0}, false, 2, 8)
+    {
+    }
+};
+
+enum class EnemyType
+{
+    Creeper,
+    Guardian
+};
+using Enemies = std::vector<std::unique_ptr<Enemy>>;
+
+class EnemySpawner
+{
+  public:
+    static void spawn(Enemies &enemies, const std::vector<Cell> &cells, EnemyType type, int floor);
 };
 
 enum class Outcome
@@ -74,7 +116,7 @@ class World
 
     Cell player() const
     {
-        return player_;
+        return player_.cell;
     }
     Cell exit() const
     {
@@ -82,7 +124,7 @@ class World
     }
     const Health &health() const
     {
-        return health_;
+        return player_.health;
     }
     int floor() const
     {
@@ -123,10 +165,9 @@ class World
     Log log_;
     std::mt19937 random_;
     std::array<Tile, Width * Height> map_{};
-    Cell player_{1, 1};
+    Character player_{{1, 1}, {30, 1}};
     Cell exit_{1, 1};
-    Health health_{30, 1};
-    std::vector<Enemy> enemies_;
+    Enemies enemies_;
     std::vector<Cell> pickups_;
     int floor_ = 1;
     int supplies_ = 1;

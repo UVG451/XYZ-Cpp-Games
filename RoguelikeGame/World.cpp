@@ -66,7 +66,7 @@ World::Distances World::distances(Cell start, bool avoidEnemies) const
             if (!walkable(next) || result[index(next)] >= 0)
                 continue;
             if (avoidEnemies && std::any_of(enemies_.begin(), enemies_.end(),
-                                            [next](const Enemy &enemy) { return enemy.cell == next; }))
+                                            [next](const auto &enemy) { return enemy->cell == next; }))
                 continue;
             result[index(next)] = result[index(cell)] + 1;
             frontier.push(next);
@@ -77,7 +77,7 @@ World::Distances World::distances(Cell start, bool avoidEnemies) const
 
 void World::generate()
 {
-    player_ = Start;
+    player_.cell = Start;
     map_.fill(Tile::Wall);
     map_[index(Start)] = Tile::Floor;
     std::vector<Cell> path{Start};
@@ -133,9 +133,9 @@ void World::generate()
 
     enemies_.clear();
     pickups_.clear();
-    enemies_.push_back({exit_, {9 + floor_ * 2, 1}, true});
-    for (int i = 0; i < scouts; ++i)
-        enemies_.push_back({spawnPoints[i], {4 + floor_, 0}, false});
+    EnemySpawner::spawn(enemies_, {exit_}, EnemyType::Guardian, floor_);
+    const std::vector<Cell> scoutCells(spawnPoints.begin(), spawnPoints.begin() + scouts);
+    EnemySpawner::spawn(enemies_, scoutCells, EnemyType::Creeper, floor_);
     pickups_.assign(spawnPoints.begin() + scouts, spawnPoints.begin() + scouts + 2);
     assert(verify());
     if (!verify())
@@ -143,9 +143,20 @@ void World::generate()
     note("Find the guardian to unlock the stairs.");
 }
 
+void EnemySpawner::spawn(Enemies &enemies, const std::vector<Cell> &cells, EnemyType type, int floor)
+{
+    for (const Cell cell : cells)
+    {
+        if (type == EnemyType::Guardian)
+            enemies.push_back(std::make_unique<Enemy>(cell, Health{9 + floor * 2, 1}, true, 4, 6));
+        else
+            enemies.push_back(std::make_unique<Creeper>(cell, floor));
+    }
+}
+
 bool World::exitOpen() const
 {
-    return std::none_of(enemies_.begin(), enemies_.end(), [](const Enemy &enemy) { return enemy.guardian; });
+    return std::none_of(enemies_.begin(), enemies_.end(), [](const auto &enemy) { return enemy->guardian; });
 }
 
 void World::note(std::string_view message)
@@ -161,12 +172,12 @@ bool World::act(Action action, Cell direction)
 
     if (action == Action::Heal)
     {
-        if (supplies_ == 0 || health_.current == health_.maximum)
+        if (supplies_ == 0 || player_.health.current == player_.health.maximum)
         {
             note(supplies_ == 0 ? "The supply pouch is empty." : "Your health is full.");
             return false;
         }
-        health_.heal(10);
+        player_.health.heal(10);
         --supplies_;
         note("Used a field kit.");
     }
@@ -174,18 +185,18 @@ bool World::act(Action action, Cell direction)
     {
         if (std::abs(direction.x) + std::abs(direction.y) != 1)
             throw std::invalid_argument("Movement must be one cardinal step");
-        const Cell next = player_ + direction;
+        const Cell next = player_.cell + direction;
         if (!walkable(next))
             return false;
         const auto enemy = std::find_if(enemies_.begin(), enemies_.end(),
-                                        [next](const Enemy &target) { return target.cell == next; });
+                                        [next](const auto &target) { return target->cell == next; });
         if (enemy != enemies_.end())
         {
-            enemy->health.hit(4);
-            note(enemy->guardian ? "You strike the guardian." : "You strike a crawler.");
-            if (enemy->health.current == 0)
+            (*enemy)->health.hit(4);
+            note((*enemy)->guardian ? "You strike the guardian." : "You strike a crawler.");
+            if ((*enemy)->health.current == 0)
             {
-                note(enemy->guardian ? "Guardian down. The stairs are open." : "Crawler defeated.");
+                note((*enemy)->guardian ? "Guardian down. The stairs are open." : "Crawler defeated.");
                 enemies_.erase(enemy);
             }
         }
@@ -196,15 +207,15 @@ bool World::act(Action action, Cell direction)
                 note("The guardian still holds the stairs.");
                 return false;
             }
-            player_ = next;
-            const auto pickup = std::find(pickups_.begin(), pickups_.end(), player_);
+            player_.cell = next;
+            const auto pickup = std::find(pickups_.begin(), pickups_.end(), player_.cell);
             if (pickup != pickups_.end())
             {
                 ++supplies_;
                 pickups_.erase(pickup);
                 note("Field kit added to the supply pouch.");
             }
-            if (player_ == exit_)
+            if (player_.cell == exit_)
             {
                 ++turn_;
                 if (floor_ == Floors)
@@ -215,7 +226,7 @@ bool World::act(Action action, Cell direction)
                 else
                 {
                     ++floor_;
-                    health_.heal(5);
+                    player_.health.heal(5);
                     generate();
                 }
                 return true;
@@ -230,21 +241,21 @@ bool World::act(Action action, Cell direction)
 
 void World::enemyTurn()
 {
-    const auto detection = distances(player_);
+    const auto detection = distances(player_.cell);
     for (auto &enemy : enemies_)
     {
-        const int distance = detection[index(enemy.cell)];
-        const bool inRange = distance >= 0 && distance <= (enemy.guardian ? 6 : 8);
-        if (inRange && !enemy.angry)
-            note(enemy.guardian ? "The guardian has spotted you." : "A crawler has spotted you.");
-        enemy.angry = inRange;
-        if (!enemy.angry)
+        const int distance = detection[index(enemy->cell)];
+        const bool inRange = enemy->finder.detects(distance);
+        if (inRange && !enemy->finder.chasing)
+            note(enemy->guardian ? "The guardian has spotted you." : "A crawler has spotted you.");
+        enemy->finder.chasing = inRange;
+        if (!enemy->finder.chasing)
             continue;
         if (distance == 1)
         {
-            health_.hit(enemy.guardian ? 4 : 2);
-            note(enemy.guardian ? "The guardian hits you." : "A crawler hits you.");
-            if (health_.current == 0)
+            player_.health.hit(enemy->attackPower);
+            note(enemy->guardian ? "The guardian hits you." : "A crawler hits you.");
+            if (player_.health.current == 0)
             {
                 outcome_ = Outcome::Defeat;
                 note("Expedition lost.");
@@ -253,37 +264,37 @@ void World::enemyTurn()
             continue;
         }
 
-        const auto reachable = distances(player_, true);
+        const auto reachable = distances(player_.cell, true);
         int best = Width * Height;
-        Cell destination = enemy.cell;
+        Cell destination = enemy->cell;
         for (const Cell step : Steps)
         {
-            const Cell next = enemy.cell + step;
+            const Cell next = enemy->cell + step;
             if (walkable(next) && reachable[index(next)] >= 0 && reachable[index(next)] < best &&
-                (enemy.guardian || !(next == exit_)) && !(next == player_))
+                (enemy->guardian || !(next == exit_)) && !(next == player_.cell))
             {
                 best = reachable[index(next)];
                 destination = next;
             }
         }
-        enemy.cell = destination;
+        enemy->cell = destination;
     }
 }
 
 bool World::verify() const
 {
-    if (!walkable(player_) || !walkable(exit_) || player_ == exit_)
+    if (!walkable(player_.cell) || !walkable(exit_) || player_.cell == exit_)
         return false;
-    const auto distance = distances(player_);
+    const auto distance = distances(player_.cell);
     if (distance[index(exit_)] < 0)
         return false;
     std::array<bool, Width * Height> occupied{};
-    occupied[index(player_)] = true;
+    occupied[index(player_.cell)] = true;
     for (const auto &enemy : enemies_)
     {
-        if (!walkable(enemy.cell) || distance[index(enemy.cell)] < 0 || occupied[index(enemy.cell)])
+        if (!walkable(enemy->cell) || distance[index(enemy->cell)] < 0 || occupied[index(enemy->cell)])
             return false;
-        occupied[index(enemy.cell)] = true;
+        occupied[index(enemy->cell)] = true;
     }
     for (const Cell kit : pickups_)
     {
