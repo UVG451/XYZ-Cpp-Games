@@ -69,9 +69,9 @@ void render(sf::RenderWindow &window, const sf::Font &font, const dungeon::World
     for (const auto kit : world.pickups())
         tile(window, kit, 10, {132, 217, 140});
     for (const auto &enemy : world.enemies())
-        tile(window, enemy.cell, enemy.guardian ? 20.f : 14.f,
-             enemy.guardian ? sf::Color{251, 148, 98}
-                            : (enemy.angry ? sf::Color{236, 112, 132} : sf::Color{163, 117, 166}));
+        tile(window, enemy->cell, enemy->guardian ? 20.f : 14.f,
+             enemy->guardian ? sf::Color{251, 148, 98}
+                             : (enemy->finder.chasing ? sf::Color{236, 112, 132} : sf::Color{163, 117, 166}));
     tile(window, world.player(), 16, {244, 242, 181});
 
     label(window, font, std::string(world.message()), 17, 22, 600);
@@ -113,7 +113,7 @@ bool selfTest()
                 world.act(Action::Heal);
             world.act(Action::Move, moves[choice(random)]);
             for (const auto &enemy : world.enemies())
-                if (!world.walkable(enemy.cell) || enemy.cell == world.player())
+                if (!world.walkable(enemy->cell) || enemy->cell == world.player())
                     return false;
         }
     }
@@ -132,8 +132,8 @@ bool selfTest()
         // Use the guardian as the target until stairs are unlocked.
         Cell goal = world.exit();
         for (const auto &enemy : world.enemies())
-            if (enemy.guardian)
-                goal = enemy.cell;
+            if (enemy->guardian)
+                goal = enemy->cell;
         std::array<std::optional<Cell>, Width * Height> firstStep;
         std::queue<Cell> frontier;
         const Cell start = world.player();
