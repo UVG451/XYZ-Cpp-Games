@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <vector>
+#include <unordered_map>
 #include <string>
 
 #include "Player.h"
@@ -61,7 +62,7 @@ namespace ApplesGame
 
         // таблица лидеров
         std::vector<Record> leaderboard;
-        bool isLeaderboardInitialized = false;
+        std::unordered_map<std::string, int> leaderboardScores;
     };
 
     void InitGame(GameState& gameState);

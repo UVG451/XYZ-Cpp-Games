@@ -43,12 +43,12 @@ namespace ArkanoidGame
                 currentStateBefore->handleEvent(event);
             }
 
-            // Special handling for Escape key to go back/pause
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
+            // Pause only when the key event began in the playing state.
+            if (event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Escape || event.key.code == sf::Keyboard::P))
             {
                 // Re-fetch current state because it may have changed during handling
                 IGameState* currentStateNow = game.getCurrentState();
-                if (currentStateNow && std::strcmp(currentStateNow->getStateName(), "PlayingState") == 0)
+                if (currentStateNow && currentStateBefore == currentStateNow && std::strcmp(currentStateNow->getStateName(), "PlayingState") == 0)
                 {
                     std::cout << "[Game] Pushing PauseMenuState..." << std::endl;
                     game.pushState(std::make_unique<PauseMenuState>());

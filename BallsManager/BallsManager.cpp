@@ -1,4 +1,6 @@
 #include <iostream>
+#include <sstream>
+#include <string>
 
 const int NUM_BALLS = 20;
 
@@ -19,17 +21,21 @@ int main()
 		std::cout << "2 - Remove ball" << std::endl;
 		std::cout << "3 - Count balls" << std::endl;
 		std::cout << "4 - Total balls" << std::endl;
-		std::cout << "5 - Needed baals" << std::endl;
+		std::cout << "5 - Missing articles" << std::endl;
 		std::cout << ">: ";
 		std::string command;
-		std::cin >> command;
+		if (!(std::cin >> command))
+			break;
 
 		if (command == "1")
 		{
 			std::cout << "Enter article: ";
 			int article = -1;
-			std::cin >> article;
-			if (article < 0 || article > NUM_BALLS - 1)
+			std::string input;
+			if (!(std::cin >> input))
+				break;
+			std::istringstream token(input);
+			if (!(token >> article) || !token.eof() || article < 0 || article >= NUM_BALLS)
 			{
 				std::cout << "Incorrect article!" << std::endl;
 			}
@@ -43,8 +49,11 @@ int main()
 		{
 			std::cout << "Enter article: ";
 			int article = -1;
-			std::cin >> article;
-			if (article < 0 || article > NUM_BALLS - 1)
+			std::string input;
+			if (!(std::cin >> input))
+				break;
+			std::istringstream token(input);
+			if (!(token >> article) || !token.eof() || article < 0 || article >= NUM_BALLS)
 			{
 				std::cout << "Incorrect article!" << std::endl;
 			}
@@ -62,8 +71,11 @@ int main()
 		{
 			std::cout << "Enter article: ";
 			int article = -1;
-			std::cin >> article;
-			if (article < 0 || article > NUM_BALLS - 1)
+			std::string input;
+			if (!(std::cin >> input))
+				break;
+			std::istringstream token(input);
+			if (!(token >> article) || !token.eof() || article < 0 || article >= NUM_BALLS)
 			{
 				std::cout << "Incorrect article!" << std::endl;
 			}
