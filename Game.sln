@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GuessingGame", "GuessingGam
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArkanoidGame", "ArkanoidGame\ArkanoidGame.vcxproj", "{C3A962DD-12D8-4E72-99F3-C940EF572498}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RoguelikeGame", "RoguelikeGame\RoguelikeGame.vcxproj", "{AE0A5311-529F-42AD-BC33-C09BF2A1D048}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -29,6 +31,12 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AE0A5311-529F-42AD-BC33-C09BF2A1D048}.Debug|x64.ActiveCfg = Debug|x64
+		{AE0A5311-529F-42AD-BC33-C09BF2A1D048}.Debug|x64.Build.0 = Debug|x64
+		{AE0A5311-529F-42AD-BC33-C09BF2A1D048}.Debug|x86.ActiveCfg = Debug|x64
+		{AE0A5311-529F-42AD-BC33-C09BF2A1D048}.Release|x64.ActiveCfg = Release|x64
+		{AE0A5311-529F-42AD-BC33-C09BF2A1D048}.Release|x64.Build.0 = Release|x64
+		{AE0A5311-529F-42AD-BC33-C09BF2A1D048}.Release|x86.ActiveCfg = Release|x64
 		{AE2B0BAC-971E-4D90-8222-6E7554C835EE}.Debug|x64.ActiveCfg = Debug|x64
 		{AE2B0BAC-971E-4D90-8222-6E7554C835EE}.Debug|x64.Build.0 = Debug|x64
 		{AE2B0BAC-971E-4D90-8222-6E7554C835EE}.Debug|x86.ActiveCfg = Debug|Win32
