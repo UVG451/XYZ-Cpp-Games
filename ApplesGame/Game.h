@@ -27,7 +27,7 @@ namespace ApplesGame
         // динамический массив яблок
         Apple* apples = nullptr;
         int applesCount = 0;          // текущее количество на поле
-        int applesTargetTotal = -1;   // -1 = бесконечно, иначе конечное число
+        int applesInitialCount = 20;
 
         // препятствия
         Obstacle obstacles[MAX_OBSTACLES];
@@ -39,6 +39,7 @@ namespace ApplesGame
         UIState uiState;
 
         bool isGameOver = false;
+        bool restartAfterWall = false;
         float timeSinceGameOver = 0.f;
 
         // Ресурсы

@@ -20,7 +20,7 @@ namespace ApplesGame
         uiState.inputHintText.setFont(font);
         uiState.inputHintText.setCharacterSize(18);
         uiState.inputHintText.setFillColor(sf::Color::White);
-        uiState.inputHintText.setString("Use arrow keys to move");
+        uiState.inputHintText.setString("Arrow keys / WASD to move | Apple +1");
         uiState.inputHintText.setOrigin(GetTextOrigin(uiState.inputHintText, { 1.f, 0.f }));
 
         // Game over text
@@ -67,6 +67,9 @@ namespace ApplesGame
         // формируем строки таблицы (только в Game Over)
         if (gameState.isGameOver)
         {
+            uiState.restartHintText.setString(gameState.restartAfterWall
+                ? "Restarting soon | SPACE to skip" : "Press SPACE to restart");
+            uiState.restartHintText.setOrigin(GetTextOrigin(uiState.restartHintText, { 0.5f, 0.f }));
             int lines = static_cast<int>(gameState.leaderboard.size());
             lines = std::min(lines, 10);
             for (int i = 0; i < lines; ++i)

@@ -101,8 +101,7 @@ namespace ApplesGame
             GenerateRandomLeaderboard(gameState, 7); // например, 7 записей
         }
 
-        if (gameState.applesCount <= 0 || gameState.applesCount > MAX_APPLES)
-            gameState.applesCount = 20;
+        gameState.applesCount = std::max(1, std::min(gameState.applesInitialCount, MAX_APPLES));
 
         gameState.currentObstaclesCount = BASE_NUM_OBSTACLES;
 
@@ -130,6 +129,7 @@ namespace ApplesGame
 
         gameState.numEatenApples = 0;
         gameState.isGameOver = false;
+        gameState.restartAfterWall = false;
         gameState.timeSinceGameOver = 0.f;
     }
 
@@ -223,6 +223,7 @@ namespace ApplesGame
             if (!gameState.isGameOver && HasPlayerCollisionWithScreenBorder(gameState.player))
             {
                 gameState.isGameOver = true;
+                gameState.restartAfterWall = true;
                 gameState.timeSinceGameOver = 0.f;
                 gameState.hitSound.play();
                 UpdateLeaderboardWithPlayer(gameState);
@@ -231,6 +232,8 @@ namespace ApplesGame
         else
         {
             gameState.timeSinceGameOver += timeDelta;
+            if (gameState.restartAfterWall && gameState.timeSinceGameOver >= 3.f)
+                RestartGame(gameState);
         }
 
         UpdateUI(gameState.uiState, gameState, timeDelta);

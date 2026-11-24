@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
                                 sf::Style::Titlebar | sf::Style::Close);
         window.setFramerateLimit(60);
         window.setKeyRepeatEnabled(false);
-        Audio audio(log);
+        Audio audio(log, {110, 0, 130.81f, 146.83f, 164.81f, 0, 146.83f, 130.81f}, 0.46f, 230.f);
         std::optional<dungeon::World> world;
         bool paused = false;
         const auto start = [&]
@@ -193,14 +193,15 @@ int main(int argc, char *argv[])
             try
             {
                 world.emplace(std::random_device{}(),
-                              [&](std::string_view message) { log.write("game", message); });
+                              [&](std::string_view message) { log.write(LogLevel::Info, "game", message); });
+                log.write(LogLevel::Info, "game", "Player, walls and enemies created");
             }
             catch (const std::logic_error &error)
             {
-                log.write("game", error.what());
+                log.write(LogLevel::Error, "game", error.what());
             }
         };
-        log.write("engine", "Window opened");
+        log.write(LogLevel::Info, "engine", "Window opened");
         while (window.isOpen())
         {
             sf::Event event{};
@@ -269,11 +270,14 @@ int main(int argc, char *argv[])
                 }
                 catch (const std::logic_error &error)
                 {
-                    log.write("game", error.what());
+                    log.write(LogLevel::Warning, "game", error.what());
                     world.reset();
                 }
                 if (acted)
+                {
+                    log.write(LogLevel::Debug, "game", "Turn " + std::to_string(world->turn()));
                     audio.step();
+                }
             }
             if (!window.isOpen())
                 break;
@@ -290,11 +294,11 @@ int main(int argc, char *argv[])
             }
             window.display();
         }
-        log.write("engine", "Window closed");
+        log.write(LogLevel::Info, "engine", "Window closed");
     }
     catch (const std::exception &error)
     {
-        log.write("engine", error.what());
+        log.write(LogLevel::Error, "engine", error.what());
         return 1;
     }
 }
